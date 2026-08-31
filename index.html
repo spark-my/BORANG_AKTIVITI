@@ -925,7 +925,7 @@ function wireTeacherAutocomplete(inputId, suggestId, fieldName){
 
 function renderRecordDoc(r){
   const s = state.settings;
-  const logoHtml = s.logo ? `<img src="${s.logo}" alt="logo">` : `<div class="logo-placeholder">LOGO</div>`;
+  const logoHtml = s.logo ? `<img src="${s.logo}" alt="logo" width="56" height="56" style="width:56px;height:56px;max-width:56px;max-height:56px;object-fit:contain;flex:none;display:block;">` : `<div class="logo-placeholder">LOGO</div>`;
 
   const aspura = r.aspura || [];
   const aspuri = r.aspuri || [];
