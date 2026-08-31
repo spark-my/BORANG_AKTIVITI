@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Borang Aktiviti &amp; Kehadiran Murid</title>
+<style>
+  :root{
+    --navy:#123049;
+    --navy-deep:#0a1f30;
+    --navy-dark:#0a1f30;
+    --navy-mid:#1c4666;
+    --coral:#d9714a;
+    --coral-deep:#b8582f;
+    --gold:#c28f2c;
+    --gold-light:#ecdcae;
+    --paper:#f7f3ea;
+    --card:#ffffff;
+    --ink:#20242b;
+    --ink-soft:#6b6459;
+    --line:#e1d9c7;
+    --danger:#a23b3b;
+    --danger-bg:#f6e9e9;
+    --good:#3c6e4d;
+  }
+  *{box-sizing:border-box;}
+  button,input,select,textarea{font-family:inherit;}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:Helvetica,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:Helvetica,"Helvetica Neue",Arial,sans-serif;margin:0;}
+  #app{max-width:980px;margin:0 auto 60px;padding:0;}
+  .content-pad{padding:20px 16px 0;max-width:948px;margin:0 auto;}
+
+  /* ---- Masthead ---- */
+  .masthead{position:relative;overflow:hidden;background:linear-gradient(155deg,var(--navy) 0%,var(--navy-deep) 100%);
+    padding:22px 18px 26px;margin-bottom:22px;color:#fff;}
+  .masthead::before{content:"";position:absolute;inset:0;opacity:.16;pointer-events:none;
+    background:repeating-linear-gradient(-38deg,rgba(255,255,255,.9) 0 3px,transparent 3px 26px);
+    -webkit-mask-image:linear-gradient(100deg,#000 0%,#000 45%,transparent 85%);
+    mask-image:linear-gradient(100deg,#000 0%,#000 45%,transparent 85%);}
+  .masthead-inner{position:relative;max-width:948px;margin:0 auto;display:flex;
+    align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+  .appbar{display:flex;align-items:center;justify-content:space-between;width:100%;gap:14px;flex-wrap:wrap;}
+  .appbar .brand{display:flex;align-items:center;gap:12px;}
+  .emblem{width:46px;height:46px;border-radius:50%;background:#fff;
+    flex:none;display:block;object-fit:cover;box-shadow:0 0 0 3px rgba(255,255,255,.25);}
+  .appbar h1{font-size:21px;font-weight:700;color:#fff;line-height:1.2;letter-spacing:-.01em;}
+  .appbar .sub{font-size:12.5px;color:var(--gold-light);margin-top:2px;}
+  .btn{border:1px solid var(--navy);background:var(--navy);color:#fff;padding:9px 14px;
+    border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;white-space:nowrap;
+    transition:transform .12s ease,box-shadow .12s ease,background .15s ease;}
+  .btn:hover{background:var(--navy-mid);}
+  .btn:active{transform:translateY(1px);}
+  .btn.secondary{background:transparent;color:var(--navy);}
+  .btn.secondary:hover{background:#eef2f6;}
+  .btn.ghost{background:transparent;color:var(--ink-soft);border-color:var(--line);}
+  .btn.danger{background:var(--danger);border-color:var(--danger);}
+  .btn.danger.outline{background:transparent;color:var(--danger);}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#fff;}
+  .btn.gold:hover{background:var(--coral-deep);border-color:var(--coral-deep);}
+  .btn.on-dark{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);color:#fff;backdrop-filter:blur(2px);}
+  .btn.on-dark:hover{background:rgba(255,255,255,.22);}
+  .btn.on-dark.primary{background:var(--gold);border-color:var(--gold);color:#1c1204;font-weight:700;}
+  .btn.on-dark.primary:hover{background:#d6a13a;}
+  .btn.small{padding:5px 10px;font-size:12.5px;border-radius:6px;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* ---- List view ---- */
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+  .toolbar input[type=search]{flex:1;min-width:160px;padding:10px 14px;border:1px solid var(--line);
+    border-radius:8px;font-size:14px;background:#fff;}
+  .toolbar input[type=search]:focus{outline:none;border-color:var(--navy-mid);box-shadow:0 0 0 3px rgba(28,70,102,.12);}
+  .empty{text-align:center;color:var(--ink-soft);padding:50px 20px;border:1px dashed var(--line);
+    border-radius:10px;background:#fff;}
+  .empty b{color:var(--ink);}
+  .card-rec{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--coral);
+    border-radius:8px;padding:14px 16px 14px 14px;margin-bottom:12px;}
+  .card-rec.alt{border-left-color:var(--gold);}
+  .card-rec .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .card-rec .tarikh{font-weight:700;color:var(--navy);font-size:15.5px;letter-spacing:-.005em;}
+  .card-rec .aktiviti{margin-top:3px;font-size:14px;color:var(--ink);}
+  .card-rec .meta{margin-top:8px;font-size:12.5px;color:var(--ink-soft);display:flex;gap:14px;flex-wrap:wrap;}
+  .card-rec .actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+  .pill{display:inline-block;background:var(--navy);color:#fff;border-radius:5px;
+    padding:3px 10px;font-size:11px;font-weight:700;letter-spacing:.02em;}
+
+  /* ---- Editor ---- */
+  .section{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:16px;margin-bottom:14px;}
+  .section h2{font-size:15px;font-weight:700;color:var(--navy);border-bottom:2px solid var(--line);
+    padding-bottom:9px;margin-bottom:14px;position:relative;}
+  .section h2::before{content:"";position:absolute;left:0;bottom:-2px;width:34px;height:2px;background:var(--coral);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr;}}
+  label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:4px;font-weight:600;}
+  input[type=text],input[type=date],textarea,select{
+    width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:7px;
+    font-size:14px;font-family:inherit;background:#fff;color:var(--ink);}
+  input[type=text]:focus,input[type=date]:focus,textarea:focus,select:focus{
+    outline:none;border-color:var(--navy-mid);box-shadow:0 0 0 3px rgba(28,70,102,.12);}
+  textarea{resize:vertical;min-height:44px;}
+  .field{margin-bottom:12px;}
+  .row-line{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .row-line input{flex:1;}
+  .row-line .num{width:26px;text-align:center;color:var(--ink-soft);font-size:13px;flex:none;}
+  .stud-row{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12.5px;
+    padding:6px 8px;background:#f7f5ef;border-radius:6px;}
+  .stud-row .num{width:20px;flex:none;text-align:center;color:var(--ink-soft);font-size:12.5px;}
+  .stud-row .stud-name{flex:2;font-weight:600;}
+  .stud-row .stud-tkt{flex:1;color:var(--ink-soft);font-size:11.5px;text-align:right;}
+  .picker-row{display:flex;gap:6px;margin:10px 0 6px;flex-wrap:wrap;}
+  .picker-row .tf-select{flex:1;min-width:132px;}
+  .picker-row .stud-select{flex:1;min-width:160px;}
+  .manual-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .manual-row input{flex:1;min-width:120px;}
+  .pick-toolbar{display:flex;justify-content:space-between;align-items:center;
+    gap:8px;margin:6px 0;flex-wrap:wrap;}
+  .pick-count{font-size:12px;color:var(--ink-soft);}
+  .pick-list{max-height:220px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;
+    background:#fbf9f4;}
+  .pick-row{display:flex;align-items:center;gap:9px;padding:6px 10px;font-size:12.5px;
+    border-bottom:1px solid var(--line);cursor:pointer;}
+  .pick-row:last-child{border-bottom:none;}
+  .pick-row:hover{background:#f1ede1;}
+  .pick-row input[type=checkbox]{flex:none;width:16px;height:16px;accent-color:var(--navy);}
+  .pick-row .pick-name{flex:1;}
+  .pick-row .pick-tkt{color:var(--ink-soft);font-size:11px;flex:none;}
+  .ac-wrap{position:relative;}
+  .ac-suggest{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:40;
+    background:#fff;border:1px solid var(--line);border-radius:8px;
+    box-shadow:0 8px 20px rgba(10,20,35,.14);max-height:220px;overflow-y:auto;}
+  .ac-suggest.show{display:block;}
+  .ac-item{padding:8px 12px;font-size:12.5px;cursor:pointer;border-bottom:1px solid var(--line);}
+  .ac-item:last-child{border-bottom:none;}
+  .ac-item:hover,.ac-item.active{background:#f1ede1;}
+  .ac-item .ac-bidang{color:var(--ink-soft);font-size:11.5px;margin-left:6px;}
+  .ac-empty{padding:9px 12px;font-size:13px;color:var(--ink-soft);}
+  .cat-block{margin-bottom:16px;}
+  .cat-title{font-weight:700;font-size:13.5px;color:var(--navy-dark);margin-bottom:8px;
+    display:flex;justify-content:space-between;align-items:center;}
+  .iconbtn{background:transparent;border:none;cursor:pointer;color:var(--danger);font-size:17px;
+    line-height:1;padding:2px 6px;flex:none;}
+  .iconbtn:hover{opacity:.7;}
+  .addlink{background:none;border:1px dashed var(--line);color:var(--navy);border-radius:7px;
+    padding:7px 10px;font-size:13px;cursor:pointer;width:100%;text-align:left;font-weight:600;}
+  .addlink:hover{background:#f3f6f9;}
+  .footbar{position:sticky;bottom:12px;background:#fff;border:1px solid var(--line);
+    border-radius:10px;box-shadow:0 8px 24px rgba(10,20,35,.14);
+    padding:12px 14px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px;}
+  .hint{font-size:12px;color:var(--ink-soft);margin-top:-6px;margin-bottom:10px;}
+  .logo-row{display:flex;align-items:center;gap:12px;}
+  .logo-preview{width:52px;height:52px;border-radius:8px;border:1px solid var(--line);
+    object-fit:contain;background:#fff;flex:none;}
+  .logo-placeholder{width:52px;height:52px;border-radius:8px;border:1px dashed var(--line);
+    flex:none;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:10px;text-align:center;}
+
+  /* ---- Print / preview document ---- */
+  .doc-wrap{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:26px 26px 30px;}
+  .doc-head{display:flex;gap:14px;align-items:flex-start;border-bottom:2.5px solid var(--navy);
+    padding-bottom:12px;margin-bottom:16px;}
+  .doc-head img,.doc-head .logo-placeholder{width:56px;height:56px;}
+  .doc-head .school-name{font-family:Helvetica,"Helvetica Neue",Arial,sans-serif;font-weight:700;font-size:16px;color:var(--navy-dark);letter-spacing:.3px;}
+  .doc-head .school-sub{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+  .doc-head .school-addr{font-size:11px;color:var(--ink-soft);margin-top:4px;line-height:1.4;}
+  .doc-panitia{text-align:center;font-weight:700;text-decoration:underline;margin:6px 0 14px;
+    font-size:14px;letter-spacing:.5px;}
+  .doc-desc{font-size:13px;margin-bottom:14px;line-height:1.5;}
+  .doc-meta{display:grid;grid-template-columns:120px 1fr;row-gap:4px;font-size:13px;margin-bottom:12px;}
+  .doc-meta .k{font-weight:600;}
+  .doc-guru{font-size:13px;margin-bottom:16px;}
+  .doc-guru b{display:block;margin-bottom:4px;}
+  .doc-guru ol{margin:0;padding-left:20px;}
+  table.combo-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:18px;}
+  table.combo-table th,table.combo-table td{border:1px solid #999;padding:1.5px 6px;text-align:left;}
+  table.combo-table th{background:#eef2f6;font-size:11px;text-align:center;}
+  table.combo-table td{line-height:1.1;}
+  .doc-sign{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:26px;font-size:12.5px;}
+  .doc-sign .line{border-top:1px solid #444;width:70%;margin:34px 0 6px;}
+  .doc-actions{display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px;}
+  .col-bil{width:26px;text-align:center;}
+  .col-tkt{width:46px;text-align:center;}
+
+  @media print{
+    body *{visibility:hidden;}
+    #printzone, #printzone *{visibility:visible;}
+    #printzone{position:absolute;left:0;top:0;width:100%;padding:0;}
+    .doc-wrap{border:none;padding:0;}
+    .doc-actions{display:none;}
+    table.combo-table{font-size:10.5px;}
+    table.combo-table th,table.combo-table td{padding:1px 5px;}
+    @page{margin:12mm;size:A4 portrait;}
+  }
+
+  #toast-box{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
+    background:var(--navy-dark);color:#fff;padding:11px 18px;border-radius:8px;
+    font-size:13.5px;max-width:88vw;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.25);
+    opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;z-index:999;
+  }
+  #toast-box.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media print{ #toast-box{display:none;} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const STORE_RECORDS = "borang-records";
+const STORE_SETTINGS = "school-settings";
+const HARI = ["Ahad","Isnin","Selasa","Rabu","Khamis","Jumaat","Sabtu"];
+
+// Senarai induk murid sekolah (Nama, Tkt/Kelas Akademik, Jantina L/P, Tingkatan 1-5)
+const MASTER_STUDENTS = [{"nama": "ABSAREENA AL-AFLAQ BINTI MOHD FARHAN AL-FIRDAUS", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "AHMAD ADAM BIN NOOR AZAM", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "AIRIS FARISAH BINTI AZMIN FADLI", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "AUNI SOFEA RAMADHANI BINTI MOHD JAIZI", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "MUHAMMAD IZZ ZAFRAN BIN MOHD FERDAUS", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "NUR DELISHA ADRIANA BINTI SUPIAN", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "NUR ZARA DIANDRA BINTI JAMALY", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "YAP MIN SIANG", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "DARIS NUFAIL RAYYAN BIN MOHD YAMIN", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MUHAMMAD NAZMIE BIN SAMAT", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MUHAMMAD NURZIQRI BIN MOHD HELMY RIZAL", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "NUR AYEESHA AZZALEEA BINTI MOHAMED MUKHRIZ", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Tari"}, {"nama": "SAJINIEKA A/P RAJINIKAN", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Tari"}, {"nama": "AIRINA ASSOFEA BINTI AMIR ARAFAT", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Teater"}, {"nama": "AMMAR KHALISH BIN JONUR SHAHRIZAL", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Teater"}, {"nama": "NURUL HASYA ZAFIRAH BINTI MOHAMAD HAFIZZUL", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Teater"}, {"nama": "SOFIA ZARA BINTI ZAMRI", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Teater"}, {"nama": "ATHENA YIE YU THONG", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "HADIF ZAYANI BIN AZNISYAM", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Visual"}, {"nama": "KHAYLA AMANDA QUAH BINTI KHAIRUL ASRI", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "MUHAMMAD DANIEL HARITH BIN MOHD TAUFIQ", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Visual"}, {"nama": "MUHAMMAD MUQRI JAAD BIN MOHD JALAINI", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Visual"}, {"nama": "MUHAMMAD UKAIL REZQALLAH BIN MOHD SHAMZUAR", "tkt": "1 Balada", "jantina": "L", "tingkatan": 1, "bidang": "Visual"}, {"nama": "MUZFIRAH AUNI BINTI MUSA", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "NUR AWATIF BINTI FAEZAL", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "NUR HANA HUMAIRA BINTI MUHAMMAD NUR FIKRI", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "NUR IRDINA ZAHRA BINTI MOHAMMAD NOOR IRWAN", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "NUR KHAYRA BINTI MOHD HAFIZ", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "SAURA HANNANI BINTI MOHD ADZWAN", "tkt": "1 Balada", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "ADNI NISRINA BINTI MUHAMAD RUSLAN", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "AUNI RIZQAH BINTI AHMAD RIDZUAN", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "MUHAMMAD ADNAF AIMAN BIN ABD RAUF", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "MUHAMMAD ZARIF FIKRI BIN SABERI", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "QISTINA ELENA BINTI YUSOFF", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "QISYA ELENA BINTI YUSOFF", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "ZAFRI HADEE BIN ZAINAL", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "AIRA KARMILA BINTI MOHD AZHARI", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Tari"}, {"nama": "AMMAR AMANI BIN AZLAN", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "DARWISH ALERON PUTRA BIN RATNO APIZAL", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "EVA JASLIN QISTINA BINTI MAHATHIR", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Tari"}, {"nama": "HANEEZ LILYANA BINTI HAQEEM LESLIE JERRY", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MUHAMAD FIRAS RAMADAN BIN MOHD HANIF", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MUHAMMAD DAIM DANIAL BIN ISMAIL", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MUHAMMAD IZZHAIDHAR BIN MOHD HARDI", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "NUR QHAILA MAISARA BINTI HERIYANTO", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Tari"}, {"nama": "NURHANNINI QAIRINA BINTI MOHAMAD NIZAIRIN", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Tari"}, {"nama": "Q MUHAMMAD HALID AL WALID BIN MOHD SUHAIMI", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "RANIA ZUHAYRA BINTI RUSYIDI", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MOHAMAD FIRAS AMSYAR BIN MOHAMAD RABANI", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Teater"}, {"nama": "MOHAMMAD FAIQ KHALISH BIN MOHAMMAD FAISAL", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Teater"}, {"nama": "MUHAMMAD RAYYAN SUFYAN BIN RIZWAN", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Teater"}, {"nama": "NUR DAMIA HANNA BINTI HAMRI", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Teater"}, {"nama": "NUR IMAN SAHARA BINTI SHAFIQ ALI", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Teater"}, {"nama": "HANNAN BASHEERA BINTI HAIRUS", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "MUHAMMAD ISKANDAR BIN MUHAMAD HANAFEE", "tkt": "1 Jazz", "jantina": "L", "tingkatan": 1, "bidang": "Visual"}, {"nama": "NORUL IMAN FATHONAH BINTI MOHAMMAD AFDHALUDDIN", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "NUR SYIFA ADELIA BINTI MOHD ZAMRI", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "NURQURRATUL QYRA QIRDYNA BINTI MOHD AZUAR", "tkt": "1 Jazz", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "AARON AFIF BIN ANDY", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "AIRIS ERYNA BINTI MOHD FADZLI", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "FIRAS ABUWASIM BIN NORDIN", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "HARITH AZFAR BIN ABDUL MALIK", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "KHALISH BIN MOHD SHAHID", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "NOAH MALIK BIN MAT NOR", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "TARI RUMI BIN MOHD ROMAIZIE", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Muzik"}, {"nama": "ERYNA BATRISYA BINTI MOHD JIHAN", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MUHAMMAD ALHAM NORFAWWAZ BIN MOHD AMRILNORMAN", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MUHAMMAD IZZAT RIZQI BIN MOHD RAZLAN", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MUHAMMAD NAZIM SALAHUDDIN BIN SHAWAL", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MUHAMMAD SYAHMI IKHWAN BIN MD LIZWAN", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Tari"}, {"nama": "MYA ZARRA AMANDA BINTI MOHD SHAHREDZAL KENNETH", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Tari"}, {"nama": "ARFA IRDINA BINTI AZLAN", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Teater"}, {"nama": "MUHAMMAD EZZAT ADAM BIN EZIHAN", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Teater"}, {"nama": "MUHAMMAD OZIL IQMAL BIN SYUKOR", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Teater"}, {"nama": "NUR DAYANA ZAFIRAH BINTI MOHD FAIZUL", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Teater"}, {"nama": "NURAISYAH SUFFIYA BINTI NOOR AZZALI", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Teater"}, {"nama": "SYAZA AMNEE BINTI SAIFUL AZAM", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Teater"}, {"nama": "UMMUL LAILA ELUIRA BINTI MOHD BAHARUDIN", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Teater"}, {"nama": "HAYFA AZALEA BINTI FYTHULLAH", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "IZZ RIZQI BIN AHMAD SANI", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Visual"}, {"nama": "MIFZAL KHALISH BIN MUHAMMAD KHIZIR", "tkt": "1 Tango", "jantina": "L", "tingkatan": 1, "bidang": "Visual"}, {"nama": "NUR AISYAH SAFIYYA BINTI MOHD KHAFIZ", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "NUR KHALISH DAMIA BINTI KHAIRIZAL", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "NUR SYA'ADAWIAH BINTI WALEK FANDI", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "PUTERI NOURA NILOUFAR BINTI MUHAMMAD RIDZUAN", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "RAJA NURHAIFA HUMAIRA BINTI RAJA ABD HALIM", "tkt": "1 Tango", "jantina": "P", "tingkatan": 1, "bidang": "Visual"}, {"nama": "ARISSA BINTI JARIR JUANY", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "MUHAMMAD NUR AIMAN MUHAIMIN BIN MOHD RAFEE", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "PUTRI RAISHA AMANDA BINTI MANSOR", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "YAP MIN SHUEN", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "ZARA ERYNA BINTI AMINUDDIN", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "ABDUL AZIM BIN MESRAN", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Tari"}, {"nama": "MUHAMMAD IZZAT AFIF BIN MOHD SHAZRILL", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Tari"}, {"nama": "MUHAMMAD NORICK NAUFAL BIN NORAIN", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Tari"}, {"nama": "RYANA QALEESYA BINTI LOKMAN", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Tari"}, {"nama": "ADAM AMSYAR BIN AZRUL", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Teater"}, {"nama": "ALIYA JANNAH BINTI AHMAD FIRDAUS", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Teater"}, {"nama": "EMANNUEL ELMEZ ENCHI ANAK BIDOK", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Teater"}, {"nama": "IZZ AARIQ BIN AQIB", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Teater"}, {"nama": "MUHAMMAD AFIEQ ZAFRY BIN MD ZULFIKRI", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Teater"}, {"nama": "SHAFFYA ISZARRYN BINTI SHAHARUDIN", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Teater"}, {"nama": "ZARA HASYA BT MOHAMMAD NIZAM", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Teater"}, {"nama": "AIRIS KHAYLA BINTI RADZI", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "AISY NABIHAH BINTI YUNUS", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "CINTA ALYAA KHALISA BINTI SOPIAN", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "IZZUSSOLIIHAH BINTI IZZUDIIN", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "JOHAN ARIFF BIN SAMSUL AFFENDI", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "MUHAMMAD AQIL QAZI BIN MOHD ZULHELMI", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "MUHAMMAD DANISH HAIKAL BIN HAIRULAZHAR", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "MUHAMMAD HADIF AHZA BIN NORMAN", "tkt": "2 Inang", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "NUR AZZALEA HUSNA BT BORHANODDIN", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "NUR HAKIMAH SYADIYAH BINTI SHAHARIL", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "SITI ALYA HUSNA BINTI MOHD ANUAR", "tkt": "2 Inang", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "AZRIEL JAZLY BIN ZULKIFLI", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "MUHAMMAD AMIR ASHRAF BIN BUDIMAN", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "MUHAMMAD HAZIQ RASYID BIN RIDZUAN", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "MUHAMMAD MIKAIL MIERZA BIN MUHAMMAD AKMALUDDIN", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "MUHAMMAD WAFI RIZQIN BIN MOHD NORAZMI", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "NYGINA BINTI DZULFAMI", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "QASEH XAVIERA BINTI SHAH RULL HAZRY", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "SUFI ADRAA AMANDA BINTI MOHD KHUSAIRI", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "AFIF QAIRIN BIN KHAIRUL AZHAR", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Tari"}, {"nama": "ARIF ZAFRAN BIN AIZUDDIN", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Tari"}, {"nama": "HAZEEQ RAYQAL BIN KHAIRUL MA'ROF", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Tari"}, {"nama": "NUR BATRISYIA UMAIRAH BINTI MOHD ZAIRUDDIN", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Tari"}, {"nama": "IZZAH NUR JANNAH BINTI RASANA", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Teater"}, {"nama": "MUHAMMAD QHALIFF AISH BIN FAIRUS", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Teater"}, {"nama": "SITI RAHADATUL 'AISY BINTI MASLAN", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Teater"}, {"nama": "CHE WAN FATNIN AWFIYAH BINTI CHE WAN AZWADI", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "IMAN NUR DAHIYAH BINTI ZULKIFLI", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "MAHIRAH FAZLIN BINTI MD FAZLI", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "MUHAMMAD HAIQAL ZHARIFF BIN ISMAIL", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "MUHAMMAD HARRAZ IFTIKHAR BIN MOHD HALALI", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "MUHAMMAD IMAN RIFQI BIN MOHD NOORAZIUL", "tkt": "2 Masri", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "NUR ASSYIFATU HAIFA BINTI MOHD ZAINI", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "NUR DAMIA QISYA BINTI MOHD DINNY", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "NUR FAKHIRA AIREENA BINTI RASZZI", "tkt": "2 Masri", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "ADRA ADELIA AMNI BINTI ADNI KHIRULIZZUAN", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "MUHAMMAD AMMAR AQEEF BIN MOHAMAD NAJIF", "tkt": "2 Zapin", "jantina": "L", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "ZARA ISYQ BINTI SHAH REDZA", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Muzik"}, {"nama": "ARIANA ZAHRA BINTI ABDULLAH SAIDI", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Tari"}, {"nama": "ARYAN DZULQARNAIN BIN MOHD AMIR", "tkt": "2 Zapin", "jantina": "L", "tingkatan": 2, "bidang": "Tari"}, {"nama": "DHIA QAIREEN IRDINA BINTI MOHD FAZLY", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Tari"}, {"nama": "FIRAZ DHEA ELZAHRA BINTI MOHD YUSLAN", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Tari"}, {"nama": "NUR IZZARA SOFIA BINTI AHMAD NASIR", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Tari"}, {"nama": "NUR QASEH UMAIRAH BINTI MOHD FAZLI", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Tari"}, {"nama": "NUR QURRATU AINI LAILA BINTI MOHD FADLY", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Tari"}, {"nama": "PUTRI IRDINAZAHRA BINTI MOHD RAZI", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Tari"}, {"nama": "SHARIFAH NURISABELLA DAMIA BINTI SYED MOHD LUQMANULHAKIM", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Tari"}, {"nama": "ANIS MASDIANA BINTI ABDUL HAFIZ", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Teater"}, {"nama": "NUR IWANA QAIREEN BINTI IRWAN", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Teater"}, {"nama": "AIMAN HARRIS BIN MOHD AZMI", "tkt": "2 Zapin", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "MUHAMMAD ALAUDDIN ZHAFRAN BIN MOHD ZAKI", "tkt": "2 Zapin", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "MUHAMMAD AMMAR HAZEEM BIN MOHD ZUHAIRI", "tkt": "2 Zapin", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "NUR DHIA ASYIFA BINTI MOHD FITRI GADHAFI", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "NUR FATHINI HANNANI BT MOHD FARMIZAL", "tkt": "2 Zapin", "jantina": "P", "tingkatan": 2, "bidang": "Visual"}, {"nama": "SUFI MUHAIMIN BIN SUHAIMI", "tkt": "2 Zapin", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "UMAR ZAQUAN BIN MOHD NAZARUDDIN", "tkt": "2 Zapin", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "ZAFRAN ILYAS BIN ABDUL RAHAMAN", "tkt": "2 Zapin", "jantina": "L", "tingkatan": 2, "bidang": "Visual"}, {"nama": "ADAM HAKIMI BIN ALEF", "tkt": "3 Bangsawan", "jantina": "L", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "AIN NURSYIFA BINTI MOHAMAD IKHRAM", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "AMEERA SOFEA BINTI AMRIL", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "CHARICE EVE HENRY", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "MUHAMMAD DARWISH BIN AZMI", "tkt": "3 Bangsawan", "jantina": "L", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "SUFHA ARIANNA BINTI MUHAMAD ALI", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "JELITA JUWITA AISYAH BINTI ELYSA NIZAL", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Tari"}, {"nama": "MIEYA KHYRRA ELYENA BINTI MOHD HAZLIMIE", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Tari"}, {"nama": "RAYKAL MIKAIL BIN ABDULLAH", "tkt": "3 Bangsawan", "jantina": "L", "tingkatan": 3, "bidang": "Tari"}, {"nama": "SITI AISYAH BINTI ESA", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Tari"}, {"nama": "AHMAD NABIL BIN AZLAN", "tkt": "3 Bangsawan", "jantina": "L", "tingkatan": 3, "bidang": "Teater"}, {"nama": "IMRAN HAILMY BIN MUSTAFAKAMAL", "tkt": "3 Bangsawan", "jantina": "L", "tingkatan": 3, "bidang": "Teater"}, {"nama": "ZARA NOUR ISLAM BINTI ZAHAREL", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Teater"}, {"nama": "AISYAH SUMAYYAH BINTI ZULKEPLY", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "ALYA DAMIA BINTI MOHD SHAH REDZA", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "AMMAR HAFIDZI BIN SAIDI", "tkt": "3 Bangsawan", "jantina": "L", "tingkatan": 3, "bidang": "Visual"}, {"nama": "CHINTA SURI EOWYN BINTI ZULKIFLI", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "IMAN QAISARA BINTI MOHAMMAD HAFIZ", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "NUR AIRISSA BINTI MOHD ASRIZAN", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "NUR FATINI QISYA BINTI AHMAD FUAD", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "NUR SAFFIYA QAISARA BINTI YAZID", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "NURUL IMAN ARISSA BINTI NORYADI", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "YAP MIN ENN", "tkt": "3 Bangsawan", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "ABU SHAFWAN BIN ABU SUFIAN", "tkt": "3 Boneka", "jantina": "L", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "FATNIN SOFEA BINTI FAKHRI", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "IMAN BIN ABDUL RAZAK", "tkt": "3 Boneka", "jantina": "L", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "NIK HANNAH BATRISYIA BINTI NIK AZRUL", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "NUR HAWA SAFIYYA BINTI MOHAMED SHAIFULLIZA", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "MUHAMMAD AQIL HASIF BIN YUSZRI", "tkt": "3 Boneka", "jantina": "L", "tingkatan": 3, "bidang": "Tari"}, {"nama": "MUHAMMAD IQRAM HAZRIQ BIN SELEH", "tkt": "3 Boneka", "jantina": "L", "tingkatan": 3, "bidang": "Tari"}, {"nama": "NUR AZURA BINTI BAKERI", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Tari"}, {"nama": "NUR QAIREEN SYAHMINA BINTI MOHD SHUHAIMI", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Tari"}, {"nama": "DZAKIR IRFAN BIN RAMLEE", "tkt": "3 Boneka", "jantina": "L", "tingkatan": 3, "bidang": "Teater"}, {"nama": "NUR ALIYA ARISSA BATRISYIA MAISARAH BINTI JAMAL AB NASIR", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Teater"}, {"nama": "NUR ATHIRAH BINTI AHMAD MAZLI", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Teater"}, {"nama": "AKASHA BAKRI BIN MOHD HAIRUL BAHARUDDIN", "tkt": "3 Boneka", "jantina": "L", "tingkatan": 3, "bidang": "Visual"}, {"nama": "AMNA NURHUSNA BINTI MOHD YAZIR", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "ARIANA BINTI AZARI", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "MUHAMMAD FIRAS FURQAN BIN MUHAMAD FIRDAUS", "tkt": "3 Boneka", "jantina": "L", "tingkatan": 3, "bidang": "Visual"}, {"nama": "MUHAMMAD ZIQRI NASHRULLAH BIN MOHD ZAMRI", "tkt": "3 Boneka", "jantina": "L", "tingkatan": 3, "bidang": "Visual"}, {"nama": "NUR ALYA BATRISYIA BINTI MOHD HELMI", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "NUR QISTINA BINTI MOHD FAIZUL", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "NUR SYALIA HANIES BINTI SAIFUL ELMEE", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "NUR ZAFIRAH BINTI YUSRI", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "NURUL DHIA IMAN BINTI ISMAIL", "tkt": "3 Boneka", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "AFEEF RAYYAN KHILFI BIN ZULKARNAIN", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "FIRDAUS SAFWAN BIN HAIZUL IZAT", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "MAHIR DARIS DANIAL BIN MAHIR AFENDI", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "MOHAMAD HARRIS NUFAIL BIN ZAMBROSSE", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "MUHAMMAD ADAM HARITH BIN ABDULLAH", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "QISYA MIASARA BINTI SAHRIAFENDY", "tkt": "3 Muzikal", "jantina": "P", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "ZARA SUFYA BINTI ZALMAIZIZI", "tkt": "3 Muzikal", "jantina": "P", "tingkatan": 3, "bidang": "Muzik"}, {"nama": "AMINAH BATRISYA BINTI AZHARUDDIN", "tkt": "3 Muzikal", "jantina": "P", "tingkatan": 3, "bidang": "Tari"}, {"nama": "ASHRULL BENJYMIN BIN SHAHRIL", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Tari"}, {"nama": "FAIZ HAKIM BIN MOHD FAZLY", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Tari"}, {"nama": "NUR DAMIA BATRISYIA BINTI MOHD YAZID", "tkt": "3 Muzikal", "jantina": "P", "tingkatan": 3, "bidang": "Tari"}, {"nama": "NUR ERYNA SOFIA BINTI DICKY SOPHIAN", "tkt": "3 Muzikal", "jantina": "P", "tingkatan": 3, "bidang": "Tari"}, {"nama": "NUR IRIS AWATIF BINTI ROSEDLLY", "tkt": "3 Muzikal", "jantina": "P", "tingkatan": 3, "bidang": "Tari"}, {"nama": "ADAM QALLEF BIN MOHD ZAWAWI", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Teater"}, {"nama": "HANI SOFEA BINTI SHAHRUL AFFENDY", "tkt": "3 Muzikal", "jantina": "P", "tingkatan": 3, "bidang": "Teater"}, {"nama": "MUHAMAD RAYYAN SYAZWAN BIN IZUAN", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Teater"}, {"nama": "WAN HAIYL MAJID BIN WAN MOHD RAYZUDDIN", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Teater"}, {"nama": "HANIS HANANNI BINTI MOHD HAZARIS", "tkt": "3 Muzikal", "jantina": "P", "tingkatan": 3, "bidang": "Visual"}, {"nama": "IQRAM ZUHAILY BIN SHAHRIL", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Visual"}, {"nama": "MUHAMMAD AMAL ANAQI BIN MOHD ARIF", "tkt": "3 Muzikal", "jantina": "L", "tingkatan": 3, "bidang": "Visual"}, {"nama": "DAMIA HANNAH BINTI MOHAMAD ARIFF", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "MUHAMMAD JOHARI HAFIZI BIN MOHD TARMIZI", "tkt": "4 Cindai", "jantina": "L", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "NURFATIHAH ZULAIKHA BINTI MOHD AZLAN", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "AIRA ARIESHA BINTI NURZURIALIS", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "AMMAR IFTIKHAR SHAH BIN IRWAN SHAH", "tkt": "4 Cindai", "jantina": "L", "tingkatan": 4, "bidang": "Tari"}, {"nama": "AUNI AWATIF BINTI HAIRUN MAHADZIR", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "KASEH QAISARA BINTI KAMARUL ARIFIN", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "NURUL AIN SYAZANA BINTI RAHIM", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "NURUL AQILAH BINTI SULAIMAN", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "AISYAH NUR HANNAH BINTI AZAM", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Teater"}, {"nama": "MUHAMMAD ADAM FIRAZ BIN AMIRUDDIN", "tkt": "4 Cindai", "jantina": "L", "tingkatan": 4, "bidang": "Teater"}, {"nama": "NUR NAZREEN AIDREESYA BINTI MOHD NAZRON", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Teater"}, {"nama": "AL QHALISHA IMAN BINTI AHMAD RIDUAN", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Visual"}, {"nama": "CAHAYA BATRISYA BINTI LOKMAN ALHAKIM", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Visual"}, {"nama": "MUHAMAD FARHAN BIN ZAHARUN HISHAM", "tkt": "4 Cindai", "jantina": "L", "tingkatan": 4, "bidang": "Visual"}, {"nama": "NUR AINA ASYIKIN BINTI JEHAN", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Visual"}, {"nama": "NUR AYRA NISA BINTI AHMAD NIZAM", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Visual"}, {"nama": "NURJANNAH NAJWA BINTI MD MASIKAH", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Visual"}, {"nama": "RADEN MIRZA BIN MUHAMMAD", "tkt": "4 Cindai", "jantina": "L", "tingkatan": 4, "bidang": "Visual"}, {"nama": "SITI SOLEHAH BINTI ARIFF FAISAL", "tkt": "4 Cindai", "jantina": "P", "tingkatan": 4, "bidang": "Visual"}, {"nama": "TAN IRO", "tkt": "4 Cindai", "jantina": "L", "tingkatan": 4, "bidang": "Visual"}, {"nama": "AN NUR NADZIF BIN MOHAMAD LOKMAN", "tkt": "4 Songket", "jantina": "L", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "PUTERI MARISSA BINTI MUHAMMAD TAIB", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "ZARITH ZARA SOFEA BINTI AZLAN", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "AISY DAMIA BINTI MOHD KAMAL ARIFFIN", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "ANIS FATIMAH BINTI ISMAIL", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "AUNI NUR QASEH BINTI MOHD AIRI", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "INTAN AMIRA BATHRISYA BINTI ABDUL RAHMAN", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "MUHAMMAD ASRIQ ISYRAQ BIN SAIFUL RIZAL", "tkt": "4 Songket", "jantina": "L", "tingkatan": 4, "bidang": "Tari"}, {"nama": "MUHAMMAD HAFIZ HIDAYAT BIN SHARUDIN", "tkt": "4 Songket", "jantina": "L", "tingkatan": 4, "bidang": "Tari"}, {"nama": "NURMIA AMANI BINTI MUHAMMAD ZAIRUL", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "NUR BATRISYA QUSYTIKA BINTI ABDUL HAKIM", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Teater"}, {"nama": "QASEH QAIREEN BINTI MOHD ROSDI", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Teater"}, {"nama": "WAN NUR DINIE MAWADDAH BINTI WAN MOHAMAD ASRAN", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Teater"}, {"nama": "AHMAD AIMAN ZAKWAN BIN KURNIA BUDI", "tkt": "4 Songket", "jantina": "L", "tingkatan": 4, "bidang": "Visual"}, {"nama": "MUHAMMAD DAILAMI HAIL BIN MOHD NURULLAIL", "tkt": "4 Songket", "jantina": "L", "tingkatan": 4, "bidang": "Visual"}, {"nama": "NOR ARAFAH BINTI MOHAMAD SHARIFFUDIN", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Visual"}, {"nama": "SUFIYA BINTI MOHD.AZRIEN HAFFIZ", "tkt": "4 Songket", "jantina": "P", "tingkatan": 4, "bidang": "Visual"}, {"nama": "WAN MUHAMMAD HADIF FIRDAUS BIN WAN MD KHAIRUDIN", "tkt": "4 Songket", "jantina": "L", "tingkatan": 4, "bidang": "Visual"}, {"nama": "AFNAN ZHAHRAN BIN MOHD KAMARUL AZMAN", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "IDHAM ISKANDAR BIN HAIRIZADT", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "LUQMAN HAKIM BIN HAIZUL IZAT", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "MUHAMMAD AMIN NAUFAL BIN HAMIRUL FARID", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "MUHAMMAD BAIHAQI HAKIMI BIN MOHD ROZAIMI", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "SYARAZY RAYYAN BIN SYAMSUL SYAZWAN", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Muzik"}, {"nama": "AZWAJILLA NUR SYIFA BINTI MOHD UYUB", "tkt": "4 Sutera", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "NUR ALYA AMANI BINTI AZAHAR", "tkt": "4 Sutera", "jantina": "P", "tingkatan": 4, "bidang": "Tari"}, {"nama": "MOHAMAD ADAM RAYYAN BIN HERIYANTO", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Teater"}, {"nama": "MOHAMAD SHUKRI BIN SHAHRUDDIN", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Teater"}, {"nama": "MUHAMMAD DANISH QHAYRI BIN HALIL", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Teater"}, {"nama": "RAISHA QISTINA BINTI SHAHIFUZIE", "tkt": "4 Sutera", "jantina": "P", "tingkatan": 4, "bidang": "Teater"}, {"nama": "WAN FATNIN ARISSA BINTI WAN AZROL", "tkt": "4 Sutera", "jantina": "P", "tingkatan": 4, "bidang": "Teater"}, {"nama": "DARLINA INSYIRAH BINTI DASNI SUPPIN", "tkt": "4 Sutera", "jantina": "P", "tingkatan": 4, "bidang": "Visual"}, {"nama": "MUHAMMAD AQIL DANISH BIN MUHAMMAD SAIFUL IZWANSH", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Visual"}, {"nama": "MUHAMMAD ARIQ RIFQY BIN MOHAMAD ZAMRI", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Visual"}, {"nama": "MUHAMMAD SHAHIRFAN BIN SAHRIZAN", "tkt": "4 Sutera", "jantina": "L", "tingkatan": 4, "bidang": "Visual"}, {"nama": "ADLINA QAISARA BINTI ADLY FARID", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "AUNI KARMILA BINTI RABI", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "FATNIN IJLAH HANNAH BINTI SAIFUL BAHRI", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "NUR ALIANA ZAHRA BINTI SAIFUL RIZAN", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "NUR RAUDHAH IRDINA BINTI AZHAR", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "SOFIA NAJIHA BINTI MUHD KHAIRUDIN", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "NUR ARIFFAH AMEERA BINTI SAZALI", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Tari"}, {"nama": "NIK JASMINE ZULAIKA BINTI NIK HASRULWADI", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Teater"}, {"nama": "A'SHADIEYAH ARTA BINTI FAIZAL", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "ADAM ASHRAF BIN SUHAIRUDIN", "tkt": "5 Budayawan", "jantina": "L", "tingkatan": 5, "bidang": "Visual"}, {"nama": "ARWYN NIA EEVA BINTI SHAHAZRIL", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "AVELYNN EISHA BINTI ZULHISHAM", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "ELYSHA BINTI DARREL", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "MUHAMMAD DINIE FAYYADH BIN MUHAMAD FAIZAL", "tkt": "5 Budayawan", "jantina": "L", "tingkatan": 5, "bidang": "Visual"}, {"nama": "MUHAMMAD ELHAM BIN EZIHAN", "tkt": "5 Budayawan", "jantina": "L", "tingkatan": 5, "bidang": "Visual"}, {"nama": "NUR AISYAH BINTI MOHD ZAIDI", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "NURLIN ATHIRAH BINTI ABD MALEK", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "QASRINA AMANI BINTI MUHAMMAD FIRDAUS", "tkt": "5 Budayawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "AISYAH AZIZ BINTI ABDUL HALIM", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "MARISSA SYUHADA BINTI ROSLE", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "MUHAMMAD AFIFFUDDIN BIN KHAMIS", "tkt": "5 Karyawan", "jantina": "L", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "NURFARISA INSYIRAH BINTI FARISZUL", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "UMMI SOFEA BINTI ARSHAD", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "FARAH NURBATRISYIA BINTI MOHD GHAZALI", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Tari"}, {"nama": "KAISAH LATIIFAH BINTI OMAR", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Tari"}, {"nama": "MARSYA NAJIHAH BINTI SAIFULIZAN", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Tari"}, {"nama": "MUHAMMAD FAEZIN BIN MOHD FAISHAL", "tkt": "5 Karyawan", "jantina": "L", "tingkatan": 5, "bidang": "Tari"}, {"nama": "RISHQA BATRISYIA BINTI RASHIDI", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Tari"}, {"nama": "MAHAAWIN A/L SIVAMOHAN", "tkt": "5 Karyawan", "jantina": "L", "tingkatan": 5, "bidang": "Teater"}, {"nama": "MUHAMMAD HARITH BIN MOKHTAR", "tkt": "5 Karyawan", "jantina": "L", "tingkatan": 5, "bidang": "Teater"}, {"nama": "NUR ALIYA ARIANA BINTI ABDUL AZIZ", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Teater"}, {"nama": "ALLYSHA BATRISYIA BINTI ZULKEFLI", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "AMIR ARSYAD BIN AZAN", "tkt": "5 Karyawan", "jantina": "L", "tingkatan": 5, "bidang": "Visual"}, {"nama": "INTAN SHAFIQAH SYAUQINA BINTI JULAINI", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "NUR AMALIN BINTI IBRAHIM", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "PUTERI BALQIS AZZAHRA BINTI JAYSRIL AZMER", "tkt": "5 Karyawan", "jantina": "P", "tingkatan": 5, "bidang": "Visual"}, {"nama": "AISHA KYRNA BINTI AHMAD SAMRI", "tkt": "5 Seniman", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "HAIKAL IRFAN BIN HAIRUDIN SHAH", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "MUHAMMAD YUSUF ASRI BIN JEFFERY", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "PUTERI ADRIANA QISTINA BINTI ANUARASID", "tkt": "5 Seniman", "jantina": "P", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "WAN ABDURRAHIM BIN MAHAT", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Muzik"}, {"nama": "IQBAL HAKIMI BIN GHAZALI", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Tari"}, {"nama": "MUHAMMAD NOOR AMZAR BIN AMRAN", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Tari"}, {"nama": "MUHAMMAD RAZIQ FARHAN BIN MUHAMMAD FARID", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Tari"}, {"nama": "NUR AFRINA RAIHAN BINTI NAZERI", "tkt": "5 Seniman", "jantina": "P", "tingkatan": 5, "bidang": "Tari"}, {"nama": "MOHAMAD EKHRAM BIN ZAILANI", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Teater"}, {"nama": "MUHAMMAD ADAM ASHRAF BIN ABDUL RAHIM", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Teater"}, {"nama": "MUHAMMAD IQBAL AFIQ BIN NORKHAIRUL", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Visual"}, {"nama": "MUHAMMAD RAIYAN QAYYUM BIN MUHAMMAD RASHIDI", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Visual"}, {"nama": "RAYYAN ZAFFRAN BIN MUHAMMAD FIRDAUS", "tkt": "5 Seniman", "jantina": "L", "tingkatan": 5, "bidang": "Visual"}];
+
+// Senarai induk guru sekolah (Nama, Bidang), sudah disusun ikut bidang & abjad nama
+const MASTER_TEACHERS = [{"nama": "AMALINA BINTI GHAZALI", "bidang": "Bahasa"}, {"nama": "ARINA IRRISYA BINTI ALIFF ISKANDAR KHOR", "bidang": "Bahasa"}, {"nama": "DALILA AYU BINTI ADAN", "bidang": "Bahasa"}, {"nama": "HASYANTI BINTI HASHIM", "bidang": "Bahasa"}, {"nama": "MOHAMMAD ISMAIL BIN TAHA", "bidang": "Bahasa"}, {"nama": "MUHAIDIR BIN MOHAMAD", "bidang": "Bahasa"}, {"nama": "NURUL INZAH BINTI WAN ZIN", "bidang": "Bahasa"}, {"nama": "SARAVANAN A/L PALANISAMY", "bidang": "Bahasa"}, {"nama": "ZARAMILA BINTI SALIM", "bidang": "Bahasa"}, {"nama": "KHAIRINA BT WAHLED @ WALID", "bidang": "Pentadbiran"}, {"nama": "MAH NYUK YING", "bidang": "Pentadbiran"}, {"nama": "MUHAMAD SAFIDZAN BIN SALMAN", "bidang": "Pentadbiran"}, {"nama": "SITI JAUHARA BINTI JAMIAN", "bidang": "Pentadbiran"}, {"nama": "TEE TIAM CHAI", "bidang": "Pentadbiran"}, {"nama": "MAULIDIYA BINTI UMAR LAYEM", "bidang": "Sains Kemasyarakatan"}, {"nama": "MOHD FIRDAUS BIN MOHD JALIL", "bidang": "Sains Kemasyarakatan"}, {"nama": "MUHAMMAD FAIQ BIN MAT RANI", "bidang": "Sains Kemasyarakatan"}, {"nama": "MUHAMMAD SHAKIFF BIN AMAT BASRI", "bidang": "Sains Kemasyarakatan"}, {"nama": "NORAFIZAH BINTI RAJION", "bidang": "Sains Kemasyarakatan"}, {"nama": "NUR AZLIN BINTI JALIL", "bidang": "Sains Kemasyarakatan"}, {"nama": "NURATIKAH BINTI ATAN", "bidang": "Sains Kemasyarakatan"}, {"nama": "SITI AKMAL RUHI BT SYEIKH ABDUL GHAFAR", "bidang": "Sains Kemasyarakatan"}, {"nama": "MAZLITA BINTI MD SALLEH", "bidang": "Sains dan Matematik"}, {"nama": "MOHD NAJIB BIN JAAFAR", "bidang": "Sains dan Matematik"}, {"nama": "NUREMELIA BINTI MOHAMAD RAWAN", "bidang": "Sains dan Matematik"}, {"nama": "NURJANNAH BINTI BERHANNUDIN", "bidang": "Sains dan Matematik"}, {"nama": "NURULAIN BINTI NARDIR", "bidang": "Sains dan Matematik"}, {"nama": "SITI NUR HAFIZAH BINTI ABDUL LATIF", "bidang": "Sains dan Matematik"}, {"nama": "SITI RAHAYU BINTI MESNAI", "bidang": "Sains dan Matematik"}, {"nama": "AHMAD NAZRI BIN NORDIN", "bidang": "Seni Muzik"}, {"nama": "MOHAMMAD HAZIQ BIN MAT RIPING", "bidang": "Seni Muzik"}, {"nama": "MOHD DZURRI BIN BACHOK", "bidang": "Seni Muzik"}, {"nama": "MUHAMMAD SYAHIR BIN MUHAMMAD JOHRI", "bidang": "Seni Muzik"}, {"nama": "NAJWA BINTI DAUD", "bidang": "Seni Muzik"}, {"nama": "NIZAM BIN RUSLI", "bidang": "Seni Muzik"}, {"nama": "NOOR FAIZ BIN JAFFAR", "bidang": "Seni Muzik"}, {"nama": "NOR SOLEHA LAILA BINTI NASIMIN", "bidang": "Seni Muzik"}, {"nama": "NORHAFIZZUL BIN ZULKIFLI", "bidang": "Seni Muzik"}, {"nama": "AMIRA NATASYA BINTI OTHMAN", "bidang": "Seni Tari"}, {"nama": "FAZRIZZAL BIN HUDZURI", "bidang": "Seni Tari"}, {"nama": "HEZZY FILZAH MARIATI BINTI ABDUL RAHMAN", "bidang": "Seni Tari"}, {"nama": "KANA ANAK JANA", "bidang": "Seni Tari"}, {"nama": "MOHD FAUZI BIN AHMAD SELO", "bidang": "Seni Tari"}, {"nama": "MUHAMAD FARIF BIN MARLIAS", "bidang": "Seni Tari"}, {"nama": "NOR HIDAYAH BINTI HAYON", "bidang": "Seni Tari"}, {"nama": "ANIZA BINTI JALAL", "bidang": "Seni Teater"}, {"nama": "IZU HANA ZILZA BINTI IMRAN", "bidang": "Seni Teater"}, {"nama": "MOHAMAD NIZAM BIN MOHD YAMIN", "bidang": "Seni Teater"}, {"nama": "NOR SYAZANA BINTI ABD GHANI", "bidang": "Seni Teater"}, {"nama": "SITI BADARIAH BINTI ZAITON", "bidang": "Seni Teater"}, {"nama": "SITI FARDOAS IZATI BINTI AHMAD", "bidang": "Seni Teater"}, {"nama": "SITI NURUL NAQUIAH BINTI MOHAMAD ISMAIL", "bidang": "Seni Teater"}, {"nama": "FAEZAH BINTI BAHARI", "bidang": "Seni Visual"}, {"nama": "MUHAMMAD HAIRI BIN ABDUL RAHIM", "bidang": "Seni Visual"}, {"nama": "NOOR YUNIZZA BINTI BAHAR", "bidang": "Seni Visual"}, {"nama": "NOR ALISA BINTI JAMALUDDIN", "bidang": "Seni Visual"}, {"nama": "NURUL SYAHIRAH BINTI RAZALI", "bidang": "Seni Visual"}, {"nama": "ROZIDALINA BINTI ABDULLAH", "bidang": "Seni Visual"}, {"nama": "SITI NASUHA BINTI KHAIRUDDIN", "bidang": "Seni Visual"}, {"nama": "SITI SALINA BINTI AB GHANI", "bidang": "Seni Visual"}];
+
+let state = {
+  view: "list",           // list | editor | preview | settings
+  loading: true,
+  records: [],
+  settings: null,
+  currentId: null,        // id of record being edited/previewed
+  draft: null,            // working copy in editor
+  search: "",
+  filters: {
+    aspura: { tingkatan: "semua", bidang: "semua" },
+    aspuri: { tingkatan: "semua", bidang: "semua" }
+  },
+  checked: { aspura: [], aspuri: [] },  // names ticked in the checkbox picker, per kategori (editor only)
+  manualOpen: { aspura: false, aspuri: false, guru: false }, // toggle for manual (non-senarai) entry
+  guruBidangFilter: "semua"
+};
+
+function getFilteredMaster(kategori){
+  const gender = kategori === "aspura" ? "L" : "P";
+  const f = (state.filters && state.filters[kategori]) || { tingkatan: "semua", bidang: "semua" };
+  const existing = new Set((state.draft[kategori]||[]).map(s => s.nama.trim().toUpperCase()));
+  return MASTER_STUDENTS
+    .filter(s => s.jantina === gender)
+    .filter(s => f.tingkatan === "semua" || String(s.tingkatan) === f.tingkatan)
+    .filter(s => f.bidang === "semua" || s.bidang === f.bidang)
+    .filter(s => !existing.has(s.nama.trim().toUpperCase()))
+    .sort((a,b) => a.nama.localeCompare(b.nama));
+}
+function studentBidangList(){
+  return [...new Set(MASTER_STUDENTS.map(s=>s.bidang))].sort((a,b)=>a.localeCompare(b));
+}
+
+function getFilteredTeachers(){
+  const bf = state.guruBidangFilter || "semua";
+  const existing = new Set((state.draft.guru||[]).filter(Boolean).map(g => g.trim().toUpperCase()));
+  return MASTER_TEACHERS
+    .filter(t => bf === "semua" || t.bidang === bf)
+    .filter(t => !existing.has(t.nama.trim().toUpperCase()))
+    .sort((a,b) => a.bidang.localeCompare(b.bidang) || a.nama.localeCompare(b.nama));
+}
+function teacherBidangList(){
+  return [...new Set(MASTER_TEACHERS.map(t=>t.bidang))].sort((a,b)=>a.localeCompare(b));
+}
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function defaultSettings(){
+  return {
+    schoolName: "SEKOLAH SENI MALAYSIA JOHOR",
+    schoolSub: "Sekolah Kluster Kecemerlangan",
+    address: "Jalan Persiaran Sinaran Ilmu, Bandar Seri Alam, 81750 Masai, Pasir Gudang, Johor",
+    tel: "07-3870215",
+    fax: "07-3860215",
+    logo: null,
+    apiUrl: "https://script.google.com/macros/s/AKfycbzUgWxUdYdLmVVCpri97zVISSgOqvHencXJ5uHiI6abyqBRt_uAz01-Ojrd5sjrPFeR/exec"   // pautan Web App Google Apps Script, jika mahu kongsi data merentasi peranti
+  };
+}
+
+function blankRecord(){
+  return {
+    id: uid(),
+    panitia: "PANITIA SENI VISUAL",
+    tarikh: "",
+    masa: "9.00 pagi – 12.30 t/hari",
+    tempat: "",
+    aktiviti: "",
+    guru: [],
+    aspura: [],
+    aspuri: [],
+    disediakanNama: "",
+    disediakanJawatan: "Jurulatih Seni Visual",
+    diluluskanNama: "",
+    diluluskanJawatan: "Pengetua",
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+}
+
+function emptyStudent(){ return { nama:"", tkt:"" }; }
+
+const HAS_STORAGE = (typeof window.storage !== "undefined" && window.storage !== null);
+let storageWarned = false;
+
+// ---- Backend kongsi (Google Apps Script) — pilihan, untuk capaian merentasi peranti ----
+function apiUrl(){ return (state.settings && state.settings.apiUrl || "").trim(); }
+
+async function apiListRecords(){
+  const url = apiUrl();
+  if(!url) return null;
+  const res = await fetch(url, { method:"GET" });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || "Gagal muat senarai");
+  return data.records || [];
+}
+async function apiSaveRecord(record){
+  const url = apiUrl();
+  if(!url) return false;
+  const res = await fetch(url, {
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" }, // elak CORS preflight pada Apps Script
+    body: JSON.stringify({ action:"save", record })
+  });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || "Gagal simpan ke pelayan");
+  return true;
+}
+async function apiDeleteRecord(id){
+  const url = apiUrl();
+  if(!url) return false;
+  const res = await fetch(url, {
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body: JSON.stringify({ action:"delete", id })
+  });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || "Gagal padam pada pelayan");
+  return true;
+}
+
+async function loadAll(){
+  if(HAS_STORAGE){
+    try{
+      const s = await window.storage.get(STORE_SETTINGS, false);
+      state.settings = s ? JSON.parse(s.value) : defaultSettings();
+    }catch(e){ state.settings = defaultSettings(); }
+  } else {
+    state.settings = defaultSettings();
+  }
+  if(!state.settings.apiUrl) state.settings.apiUrl = "";
+
+  await refreshRecordsFromSource();
+
+  state.loading = false;
+  render();
+  if(!HAS_STORAGE && !apiUrl()) showToast("Nota: dibuka di luar Claude tanpa Pautan API — borang disimpan untuk sesi ini sahaja.", 5000);
+}
+
+async function refreshRecordsFromSource(){
+  if(apiUrl()){
+    try{
+      state.records = await apiListRecords();
+      return;
+    }catch(e){
+      showToast("Gagal sambung ke Pautan API. Menggunakan storan tempatan buat sementara.", 4000);
+    }
+  }
+  if(HAS_STORAGE){
+    try{
+      const r = await window.storage.get(STORE_RECORDS, false);
+      state.records = r ? JSON.parse(r.value) : [];
+    }catch(e){ state.records = state.records || []; }
+  } else if(!state.records){
+    state.records = [];
+  }
+}
+
+async function persistRecords(){
+  if(!HAS_STORAGE) return;
+  try{
+    await window.storage.set(STORE_RECORDS, JSON.stringify(state.records), false);
+  }catch(e){ /* simpanan dalaman (state.records) masih kekal untuk sesi semasa */ }
+}
+async function persistSettings(){
+  if(!HAS_STORAGE) return;
+  try{
+    await window.storage.set(STORE_SETTINGS, JSON.stringify(state.settings), false);
+  }catch(e){ /* simpanan dalaman (state.settings) masih kekal untuk sesi semasa */ }
+}
+
+function showToast(msg, duration){
+  let t = document.getElementById("toast-box");
+  if(!t){
+    t = document.createElement("div");
+    t.id = "toast-box";
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=> t.classList.remove("show"), duration || 2200);
+}
+
+function fmtTarikh(iso){
+  if(!iso) return "—";
+  const d = new Date(iso+"T00:00:00");
+  if(isNaN(d)) return iso;
+  const hari = HARI[d.getDay()];
+  const bulan = ["Januari","Februari","Mac","April","Mei","Jun","Julai","Ogos","September","Oktober","November","Disember"][d.getMonth()];
+  return hari + ", " + d.getDate() + " " + bulan + " " + d.getFullYear();
+}
+
+function esc(s){
+  return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+// Singkatkan nama kelas (Tkt) untuk cetakan, cth "3 Bangsawan" -> "3 BG".
+// Kod khas untuk kelas yang disahkan; selainnya guna 2 huruf pertama sebagai lalai.
+const TKT_ABBR_OVERRIDES = { "bangsawan":"BG", "muzikal":"MZ" };
+function abbrTkt(tkt){
+  if(!tkt) return "";
+  const parts = tkt.trim().split(/\s+/);
+  if(parts.length < 2) return tkt;
+  const num = parts[0];
+  const word = parts.slice(1).join(" ");
+  const code = TKT_ABBR_OVERRIDES[word.toLowerCase()] || word.slice(0,2).toUpperCase();
+  return num + " " + code;
+}
+
+/* ---------------- Actions ---------------- */
+const app = {
+  async goList(){
+    state.view="list"; state.currentId=null; state.draft=null;
+    render();
+    await refreshRecordsFromSource();
+    render();
+  },
+  async refreshList(){
+    await refreshRecordsFromSource();
+    render();
+    showToast("Senarai dikemas kini.", 1500);
+  },
+
+  newRecord(){
+    state.draft = blankRecord();
+    state.view = "editor";
+    render();
+  },
+  editRecord(id){
+    const rec = state.records.find(r=>r.id===id);
+    if(!rec) return;
+    state.draft = JSON.parse(JSON.stringify(rec));
+    state.view = "editor";
+    render();
+  },
+  async duplicateRecord(id){
+    const rec = state.records.find(r=>r.id===id);
+    if(!rec) return;
+    const copy = JSON.parse(JSON.stringify(rec));
+    copy.id = uid();
+    copy.tarikh = "";
+    copy.createdAt = Date.now();
+    copy.updatedAt = Date.now();
+    state.records.unshift(copy);
+    render();
+    try{
+      if(apiUrl()) await apiSaveRecord(copy);
+      else persistRecords();
+    }catch(e){ showToast("Gagal simpan salinan ke pelayan.", 3000); }
+  },
+  async deleteRecord(id){
+    const rec = state.records.find(r=>r.id===id);
+    if(!rec) return;
+    if(!confirm("Padam borang untuk " + (rec.aktiviti||"aktiviti ini") + "? Tindakan ini tidak boleh diundur.")) return;
+    state.records = state.records.filter(r=>r.id!==id);
+    render();
+    try{
+      if(apiUrl()) await apiDeleteRecord(id);
+      else persistRecords();
+    }catch(e){ showToast("Gagal padam pada pelayan.", 3000); }
+  },
+  previewRecord(id){
+    state.currentId = id;
+    state.view = "preview";
+    render();
+  },
+
+  updateDraft(field, value){ state.draft[field] = value; },
+
+  removeGuru(i){ state.draft.guru.splice(i,1); if(state.draft.guru.length===0) state.draft.guru=[]; render(); },
+
+  setGuruBidangFilter(val){ state.guruBidangFilter = val; render(); },
+  addGuruFromMaster(){
+    const sel = document.getElementById("select-guru");
+    if(!sel || sel.value === "") return;
+    const idx = parseInt(sel.value, 10);
+    const t = getFilteredTeachers()[idx];
+    if(!t) return;
+    state.draft.guru = state.draft.guru.filter(Boolean);
+    state.draft.guru.push(t.nama);
+    render();
+  },
+  toggleManualGuru(){ state.manualOpen.guru = !state.manualOpen.guru; render(); },
+  addManualGuru(){
+    const el = document.getElementById("manual-nama-guru");
+    const nama = (el.value||"").trim();
+    if(!nama){ alert("Sila isi nama guru."); return; }
+    state.draft.guru = state.draft.guru.filter(Boolean);
+    state.draft.guru.push(nama);
+    render();
+  },
+
+  removeStudent(kategori,i){ state.draft[kategori].splice(i,1); render(); },
+
+  setTingkatanFilter(kategori, val){ state.filters[kategori].tingkatan = val; render(); },
+  setBidangFilter(kategori, val){ state.filters[kategori].bidang = val; render(); },
+
+  toggleCheck(kategori, nama){
+    const arr = state.checked[kategori];
+    const i = arr.indexOf(nama);
+    if(i >= 0) arr.splice(i,1); else arr.push(nama);
+    render();
+  },
+  checkAllVisible(kategori){
+    const filtered = getFilteredMaster(kategori);
+    state.checked[kategori] = filtered.map(s=>s.nama);
+    render();
+  },
+  uncheckAll(kategori){
+    state.checked[kategori] = [];
+    render();
+  },
+  addCheckedToCategory(kategori){
+    const names = new Set(state.checked[kategori]);
+    if(names.size === 0) return;
+    const toAdd = MASTER_STUDENTS.filter(s => names.has(s.nama));
+    toAdd.forEach(s => state.draft[kategori].push({ nama: s.nama, tkt: s.tkt }));
+    state.checked[kategori] = [];
+    render();
+  },
+
+  toggleManual(kategori){
+    state.manualOpen[kategori] = !state.manualOpen[kategori];
+    render();
+  },
+  addManual(kategori){
+    const namaEl = document.getElementById("manual-nama-"+kategori);
+    const tktEl = document.getElementById("manual-tkt-"+kategori);
+    const nama = (namaEl.value||"").trim();
+    const tkt = (tktEl.value||"").trim();
+    if(!nama){ alert("Sila isi nama murid."); return; }
+    state.draft[kategori].push({ nama, tkt });
+    render();
+  },
+
+  async saveDraft(){
+    const d = state.draft;
+    if(!d.tarikh){ alert("Sila isi tarikh aktiviti."); return; }
+    if(!d.aktiviti.trim()){ alert("Sila isi nama aktiviti."); return; }
+    d.guru = d.guru.map(g=>g.trim()).filter(Boolean);
+    d.updatedAt = Date.now();
+    const idx = state.records.findIndex(r=>r.id===d.id);
+    if(idx>=0) state.records[idx]=d; else state.records.unshift(d);
+    state.view="list"; state.draft=null;
+    render();
+    try{
+      if(apiUrl()) await apiSaveRecord(d);
+      else persistRecords();
+      showToast("Borang berjaya disimpan.");
+    }catch(e){
+      showToast("Borang disimpan tempatan sahaja — gagal hantar ke pelayan.", 4000);
+    }
+  },
+  cancelEdit(){
+    if(!confirm("Buang perubahan yang belum disimpan?")) return;
+    state.view="list"; state.draft=null; render();
+  },
+
+  previewDraft(){ state.view = "draftPreview"; render(); },
+  backToEditor(){ state.view = "editor"; render(); },
+
+  openSettings(){ state.view="settings"; render(); },
+  saveSettingsForm(){
+    persistSettings();
+    state.view="list";
+    render();
+  },
+  onLogoFile(input){
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      state.settings.logo = reader.result;
+      render();
+    };
+    reader.readAsDataURL(file);
+  },
+  removeLogo(){ state.settings.logo = null; render(); },
+
+  doPrint(){
+    const zone = document.getElementById("printzone");
+    if(!zone){ alert("Tiada borang untuk dicetak."); return; }
+    const styleTag = document.querySelector("style");
+    const css = styleTag ? styleTag.innerHTML : "";
+    const docHtml = zone.outerHTML;
+    const fullHtml = `<!DOCTYPE html><html lang="ms"><head><meta charset="UTF-8">
+      <title>Cetak Borang</title><style>${css}
+      body{background:#fff;padding:20px;}
+      </style></head><body>${docHtml}
+      <script>window.onload=function(){ window.focus(); window.print(); };<\/script>
+      </body></html>`;
+
+    let win = null;
+    try{ win = window.open("", "_blank"); }catch(e){ win = null; }
+
+    if(win){
+      win.document.open();
+      win.document.write(fullHtml);
+      win.document.close();
+    } else {
+      // Pop-up disekat oleh pelayar — cuba cetak terus sebagai gantian
+      showToast("Pop-up disekat. Sila benarkan pop-up untuk pelayar ini supaya cetakan boleh dibuka dalam tab baharu.", 4000);
+      window.print();
+    }
+  },
+
+  setSearch(v){ state.search = v; render(); }
+};
+window.app = app;
+
+/* ---------------- Renderers ---------------- */
+function render(){
+  const el = document.getElementById("app");
+  if(state.loading){ el.innerHTML = "<p style='padding:40px;text-align:center;color:#5b6270;'>Memuatkan…</p>"; return; }
+  let html = renderAppbar();
+  html += `<div class="content-pad">`;
+  if(state.view==="list") html += renderList();
+  else if(state.view==="editor") html += renderEditor();
+  else if(state.view==="preview") html += renderPreview();
+  else if(state.view==="draftPreview") html += renderDraftPreview();
+  else if(state.view==="settings") html += renderSettings();
+  html += `</div>`;
+  el.innerHTML = html;
+  wireEditorInputs();
+}
+
+function renderAppbar(){
+  return `
+  <div class="masthead"><div class="masthead-inner">
+  <div class="appbar">
+    <div class="brand">
+      <img class="emblem" src="data:image/png;base64,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" alt="Logo SSeMJ">
+      <div>
+        <h1>Sistem Borang Aktiviti Murid</h1>
+        <div class="sub">${esc(state.settings.schoolName)}</div>
+      </div>
+    </div>
+    ${state.view==="list" ? `
+      <div style="display:flex;gap:8px;">
+        <button class="btn on-dark" onclick="app.openSettings()">Tetapan</button>
+        <button class="btn on-dark primary" onclick="app.newRecord()">+ Borang Baharu</button>
+      </div>` : state.view==="draftPreview" ? `<button class="btn on-dark" onclick="app.backToEditor()">← Kembali Sunting</button>`
+      : `<button class="btn on-dark" onclick="app.goList()">← Senarai</button>`}
+  </div>
+  </div></div>`;
+}
+
+function renderList(){
+  const q = state.search.trim().toLowerCase();
+  let list = [...state.records].sort((a,b)=> (b.tarikh||"").localeCompare(a.tarikh||""));
+  if(q){
+    list = list.filter(r =>
+      (r.aktiviti||"").toLowerCase().includes(q) ||
+      (r.panitia||"").toLowerCase().includes(q) ||
+      (r.tempat||"").toLowerCase().includes(q) ||
+      (r.guru||[]).some(g=>g.toLowerCase().includes(q))
+    );
+  }
+  let body;
+  if(state.records.length===0){
+    body = `<div class="empty"><b>Tiada borang lagi.</b><br>Tekan "+ Borang Baharu" untuk mula merekod aktiviti dan senarai murid.</div>`;
+  } else if(list.length===0){
+    body = `<div class="empty">Tiada borang sepadan dengan carian.</div>`;
+  } else {
+    body = list.map((r,idx)=>{
+      const jumlah = (r.aspura||[]).length + (r.aspuri||[]).length;
+      return `<div class="card-rec${idx%2?' alt':''}">
+        <div class="top">
+          <div>
+            <div class="tarikh">${fmtTarikh(r.tarikh)}</div>
+            <div class="aktiviti">${esc(r.aktiviti)||"<i style='color:#999'>(tiada nama aktiviti)</i>"}</div>
+          </div>
+          <span class="pill">${esc(r.panitia)}</span>
+        </div>
+        <div class="meta">
+          <span>📍 ${esc(r.tempat)||"—"}</span>
+          <span>🕒 ${esc(r.masa)||"—"}</span>
+          <span>👥 ${jumlah} murid</span>
+          <span>👨‍🏫 ${(r.guru||[]).filter(Boolean).length} guru</span>
+        </div>
+        <div class="actions">
+          <button class="btn small secondary" onclick="app.previewRecord('${r.id}')">Lihat / Cetak</button>
+          <button class="btn small secondary" onclick="app.editRecord('${r.id}')">Sunting</button>
+          <button class="btn small ghost" onclick="app.duplicateRecord('${r.id}')">Salin</button>
+          <button class="btn small danger outline" onclick="app.deleteRecord('${r.id}')">Padam</button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+  return `
+    <div class="toolbar">
+      <input type="search" placeholder="Cari aktiviti, panitia, tempat atau guru…" value="${esc(state.search)}" oninput="app.setSearch(this.value)">
+      ${apiUrl() ? `<button class="btn small secondary" onclick="app.refreshList()" title="Tarik kemas kini terkini daripada guru lain">🔄 Muat Semula</button>` : ""}
+    </div>
+    ${apiUrl() ? `<div class="hint" style="margin:-8px 0 12px;">🔗 Mod kongsi aktif — semua guru yang guna Pautan API yang sama nampak senarai ini.</div>` : ""}
+    ${body}
+  `;
+}
+
+function renderEditor(){
+  const d = state.draft;
+  const guruList = d.guru.filter(Boolean);
+  const guruRows = guruList.map((g,i)=>{
+    const t = MASTER_TEACHERS.find(x=>x.nama.trim().toUpperCase()===g.trim().toUpperCase());
+    return `<div class="stud-row">
+      <span class="num">${i+1}.</span>
+      <div class="stud-name">${esc(g)}</div>
+      <div class="stud-tkt">${t?esc(t.bidang):"—"}</div>
+      <button class="iconbtn" title="Buang" onclick="app.removeGuru(${i})">✕</button>
+    </div>`;
+  }).join("");
+  const bf = state.guruBidangFilter || "semua";
+  const filteredTeachers = getFilteredTeachers();
+  const guruOptions = filteredTeachers.map((t,i)=>`<option value="${i}">${esc(t.nama)} — ${esc(t.bidang)}</option>`).join("");
+  const guruManualOpen = !!state.manualOpen.guru;
+
+  function studentBlock(kategori,label){
+    const added = d[kategori]||[];
+    const rows = added.map((s,i)=>`
+      <div class="stud-row">
+        <span class="num">${i+1}.</span>
+        <div class="stud-name">${esc(s.nama)}</div>
+        <div class="stud-tkt">${esc(s.tkt)||"—"}</div>
+        <button class="iconbtn" title="Buang" onclick="app.removeStudent('${kategori}',${i})">✕</button>
+      </div>`).join("");
+
+    const f = state.filters[kategori] || { tingkatan:"semua", bidang:"semua" };
+    const filtered = getFilteredMaster(kategori);
+    const checkedSet = new Set(state.checked[kategori]);
+    const manualOpen = !!state.manualOpen[kategori];
+
+    const checklist = filtered.map(s=>`
+      <label class="pick-row">
+        <input type="checkbox" ${checkedSet.has(s.nama)?"checked":""} onchange="app.toggleCheck('${kategori}','${s.nama.replace(/'/g,"\\'")}')">
+        <span class="pick-name">${esc(s.nama)}</span>
+        <span class="pick-tkt">${esc(s.tkt)}</span>
+      </label>`).join("");
+
+    const checkedCount = state.checked[kategori].length;
+
+    return `<div class="cat-block">
+      <div class="cat-title"><span>${label} (${added.length})</span></div>
+      ${rows || `<div class="hint" style="margin:0 0 8px;">Belum ada murid ditambah.</div>`}
+      <div class="picker-row">
+        <select class="tf-select" onchange="app.setTingkatanFilter('${kategori}',this.value)">
+          <option value="semua" ${f.tingkatan==="semua"?"selected":""}>Semua Tingkatan</option>
+          ${[1,2,3,4,5].map(t=>`<option value="${t}" ${f.tingkatan===String(t)?"selected":""}>Tingkatan ${t}</option>`).join("")}
+        </select>
+        <select class="tf-select" onchange="app.setBidangFilter('${kategori}',this.value)">
+          <option value="semua" ${f.bidang==="semua"?"selected":""}>Semua Bidang</option>
+          ${studentBidangList().map(b=>`<option value="${esc(b)}" ${f.bidang===b?"selected":""}>${esc(b)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="pick-toolbar">
+        <span class="pick-count">${filtered.length} murid sepadan${checkedCount?` · ${checkedCount} ditanda`:""}</span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn small ghost" onclick="app.checkAllVisible('${kategori}')" ${filtered.length===0?"disabled":""}>Tanda semua</button>
+          <button class="btn small ghost" onclick="app.uncheckAll('${kategori}')" ${checkedCount===0?"disabled":""}>Kosongkan</button>
+        </div>
+      </div>
+      <div class="pick-list">
+        ${checklist || `<div class="hint" style="margin:8px 0;">— tiada murid sepadan —</div>`}
+      </div>
+      <button class="btn gold" style="width:100%;margin-top:8px;" onclick="app.addCheckedToCategory('${kategori}')" ${checkedCount===0?"disabled":""}>+ Tambah ${checkedCount||""} murid ditanda</button>
+      <button class="addlink" style="margin-top:8px;" onclick="app.toggleManual('${kategori}')">${manualOpen?"– Tutup tambah manual":"+ Murid tiada dalam senarai?"}</button>
+      ${manualOpen ? `
+        <div class="manual-row">
+          <input type="text" id="manual-nama-${kategori}" placeholder="Nama murid">
+          <input type="text" id="manual-tkt-${kategori}" placeholder="Tingkatan (cth: 3 Bangsawan)">
+          <button class="btn small secondary" onclick="app.addManual('${kategori}')">Tambah</button>
+        </div>` : ""}
+    </div>`;
+  }
+
+  return `
+  <div class="section">
+    <h2>Maklumat Aktiviti</h2>
+    <div class="field">
+      <label>Panitia</label>
+      <input type="text" data-field="panitia" value="${esc(d.panitia)}" placeholder="cth: PANITIA SENI VISUAL">
+    </div>
+    <div class="field">
+      <label>Nama Aktiviti</label>
+      <textarea data-field="aktiviti" placeholder="cth: Persediaan Pertandingan Doodle SWM Environment Peringkat Kebangsaan">${esc(d.aktiviti)}</textarea>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Tarikh</label>
+        <input type="date" data-field="tarikh" value="${esc(d.tarikh)}">
+      </div>
+      <div class="field">
+        <label>Masa</label>
+        <input type="text" data-field="masa" value="${esc(d.masa)}" placeholder="cth: 9.00 pagi – 12.30 t/hari">
+      </div>
+    </div>
+    <div class="field">
+      <label>Tempat</label>
+      <input type="text" data-field="tempat" value="${esc(d.tempat)}" placeholder="cth: Studio Seni Visual">
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Guru Bertugas</h2>
+    ${guruRows || `<div class="hint" style="margin:0 0 8px;">Belum ada guru ditambah.</div>`}
+    <div class="picker-row">
+      <select class="tf-select" onchange="app.setGuruBidangFilter(this.value)">
+        <option value="semua" ${bf==="semua"?"selected":""}>Semua Bidang</option>
+        ${teacherBidangList().map(b=>`<option value="${esc(b)}" ${bf===b?"selected":""}>${esc(b)}</option>`).join("")}
+      </select>
+      <select id="select-guru" class="stud-select">
+        ${guruOptions || `<option value="">— tiada guru sepadan —</option>`}
+      </select>
+      <button class="btn small gold" onclick="app.addGuruFromMaster()" ${filteredTeachers.length===0?"disabled":""}>+ Tambah</button>
+    </div>
+    <button class="addlink" onclick="app.toggleManualGuru()">${guruManualOpen?"– Tutup tambah manual":"+ Guru tiada dalam senarai?"}</button>
+    ${guruManualOpen ? `
+      <div class="manual-row">
+        <input type="text" id="manual-nama-guru" placeholder="Nama guru">
+        <button class="btn small secondary" onclick="app.addManualGuru()">Tambah</button>
+      </div>` : ""}
+  </div>
+
+  <div class="section">
+    <h2>Senarai Murid</h2>
+    <div class="hint">Pilih murid daripada senarai induk sekolah (ditapis ikut jantina secara automatik) — Aspura = Lelaki, Aspuri = Perempuan.</div>
+    ${studentBlock('aspura','Aspura')}
+    ${studentBlock('aspuri','Aspuri')}
+  </div>
+
+  <div class="section">
+    <h2>Pengesahan</h2>
+    <div class="grid2">
+      <div>
+        <div class="field">
+          <label>Disediakan oleh (nama)</label>
+          <div class="ac-wrap">
+            <input type="text" id="disediakan-nama-input" data-field="disediakanNama" autocomplete="off" value="${esc(d.disediakanNama)}" placeholder="Taip nama guru…">
+            <div id="disediakan-nama-suggest" class="ac-suggest"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Jawatan</label>
+          <input type="text" data-field="disediakanJawatan" value="${esc(d.disediakanJawatan)}">
+        </div>
+      </div>
+      <div>
+        <div class="field">
+          <label>Diluluskan oleh (nama)</label>
+          <input type="text" data-field="diluluskanNama" value="${esc(d.diluluskanNama)}" placeholder="Nama Pengetua">
+        </div>
+        <div class="field">
+          <label>Jawatan</label>
+          <input type="text" data-field="diluluskanJawatan" value="${esc(d.diluluskanJawatan)}">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footbar">
+    <button class="btn ghost" onclick="app.cancelEdit()">Batal</button>
+    <button class="btn secondary" onclick="app.previewDraft()">👁️ Pratonton</button>
+    <button class="btn gold" onclick="app.saveDraft()">Simpan Borang</button>
+  </div>
+  `;
+}
+
+function wireEditorInputs(){
+  if(state.view!=="editor") return;
+  document.querySelectorAll("[data-field]").forEach(inp=>{
+    inp.addEventListener("input", ()=> app.updateDraft(inp.dataset.field, inp.value));
+  });
+  wireTeacherAutocomplete("disediakan-nama-input", "disediakan-nama-suggest", "disediakanNama");
+}
+
+function wireTeacherAutocomplete(inputId, suggestId, fieldName){
+  const input = document.getElementById(inputId);
+  const box = document.getElementById(suggestId);
+  if(!input || !box) return;
+
+  function renderSuggestions(){
+    const q = input.value.trim().toLowerCase();
+    if(!q){ box.classList.remove("show"); box.innerHTML=""; return; }
+    const matches = MASTER_TEACHERS
+      .filter(t => t.nama.toLowerCase().includes(q))
+      .sort((a,b)=> a.nama.localeCompare(b.nama))
+      .slice(0, 8);
+    if(matches.length === 0){
+      box.innerHTML = `<div class="ac-empty">Tiada guru sepadan dalam senarai — nama akan disimpan seperti ditaip.</div>`;
+    } else {
+      box.innerHTML = matches.map(t =>
+        `<div class="ac-item" data-nama="${esc(t.nama)}">${esc(t.nama)}<span class="ac-bidang">${esc(t.bidang)}</span></div>`
+      ).join("");
+    }
+    box.classList.add("show");
+  }
+
+  input.addEventListener("input", renderSuggestions);
+  input.addEventListener("focus", renderSuggestions);
+  box.addEventListener("mousedown", (e)=>{
+    const item = e.target.closest(".ac-item");
+    if(!item) return;
+    e.preventDefault();
+    input.value = item.dataset.nama;
+    app.updateDraft(fieldName, item.dataset.nama);
+    box.classList.remove("show");
+  });
+  input.addEventListener("blur", ()=> setTimeout(()=> box.classList.remove("show"), 120));
+}
+
+function renderRecordDoc(r){
+  const s = state.settings;
+  const logoHtml = s.logo ? `<img src="${s.logo}" alt="logo">` : `<div class="logo-placeholder">LOGO</div>`;
+
+  const aspura = r.aspura || [];
+  const aspuri = r.aspuri || [];
+  const rowCount = Math.max(aspura.length, aspuri.length, 1);
+  let comboRows = "";
+  for(let i=0; i<rowCount; i++){
+    const l = aspura[i];
+    const rgt = aspuri[i];
+    comboRows += `<tr>
+      <td class="col-bil">${l?i+1:""}</td><td>${l?esc(l.nama):""}</td><td class="col-tkt">${l?esc(abbrTkt(l.tkt)):""}</td>
+      <td class="col-bil">${rgt?i+1:""}</td><td>${rgt?esc(rgt.nama):""}</td><td class="col-tkt">${rgt?esc(abbrTkt(rgt.tkt)):""}</td>
+    </tr>`;
+  }
+  if(aspura.length===0 && aspuri.length===0){
+    comboRows = `<tr><td colspan="6" style="color:#999;text-align:center;">Tiada murid direkodkan</td></tr>`;
+  }
+
+  return `
+  <div class="doc-wrap" id="printzone">
+    <div class="doc-head">
+      ${logoHtml}
+      <div>
+        <div class="school-name">${esc(s.schoolName)}</div>
+        <div class="school-sub">${esc(s.schoolSub)}</div>
+        <div class="school-addr">${esc(s.address)}<br>TEL: ${esc(s.tel)} &nbsp;&nbsp; FAX: ${esc(s.fax)}</div>
+      </div>
+    </div>
+    <div class="doc-panitia">${esc(r.panitia)||"—"}</div>
+    <div class="doc-desc">Senarai nama pelajar Sekolah Seni Malaysia Johor yang tinggal di asrama Aspura / Aspuri untuk menghadiri mesyuarat / aktiviti / kelas gantian / kelas tambahan.</div>
+    <div class="doc-meta">
+      <div class="k">Tarikh</div><div>: ${fmtTarikh(r.tarikh)}</div>
+      <div class="k">Masa</div><div>: ${esc(r.masa)||"—"}</div>
+      <div class="k">Tempat</div><div>: ${esc(r.tempat)||"—"}</div>
+      <div class="k">Aktiviti</div><div>: ${esc(r.aktiviti)||"—"}</div>
+    </div>
+    <div class="doc-guru">
+      <b>Guru bertugas:</b>
+      <ol>${(r.guru||[]).filter(Boolean).map(g=>`<li>${esc(g)}</li>`).join("") || "<li>—</li>"}</ol>
+    </div>
+    <table class="combo-table">
+      <thead>
+        <tr>
+          <th class="col-bil">Bil.</th><th>Senarai nama di Aspura</th><th class="col-tkt">Tkt.</th>
+          <th class="col-bil">Bil.</th><th>Senarai nama di Aspuri</th><th class="col-tkt">Tkt.</th>
+        </tr>
+      </thead>
+      <tbody>${comboRows}</tbody>
+    </table>
+    <div class="doc-sign">
+      <div>
+        Disediakan oleh:
+        <div class="line"></div>
+        <b>${esc(r.disediakanNama)||"—"}</b><br>
+        ${esc(r.disediakanJawatan)}<br>
+        ${esc(s.schoolName)}
+      </div>
+      <div>
+        Diluluskan oleh:
+        <div class="line"></div>
+        <b>${esc(r.diluluskanNama)||"—"}</b><br>
+        ${esc(r.diluluskanJawatan)}<br>
+        ${esc(s.schoolName)}
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function renderPreview(){
+  const r = state.records.find(x=>x.id===state.currentId);
+  if(!r) return `<div class="empty">Borang tidak dijumpai.</div>`;
+  return `
+  <div class="doc-actions">
+    <button class="btn secondary" onclick="app.editRecord('${r.id}')">Sunting</button>
+    <button class="btn gold" onclick="app.doPrint()">🖨️ Cetak</button>
+  </div>
+  ${renderRecordDoc(r)}
+  `;
+}
+
+function renderDraftPreview(){
+  const r = state.draft;
+  if(!r) return `<div class="empty">Tiada borang sedang disunting.</div>`;
+  return `
+  <div class="doc-actions">
+    <button class="btn secondary" onclick="app.backToEditor()">← Kembali Sunting</button>
+    <button class="btn gold" onclick="app.doPrint()">🖨️ Cetak</button>
+  </div>
+  <div class="hint" style="margin-bottom:10px;">Ini pratonton borang sebelum disimpan. Tekan "Kembali Sunting" untuk teruskan mengisi, atau cetak terus dari sini.</div>
+  ${renderRecordDoc(r)}
+  `;
+}
+
+function renderSettings(){
+  const s = state.settings;
+  const logoPreview = s.logo
+    ? `<img class="logo-preview" src="${s.logo}">`
+    : `<div class="logo-placeholder">TIADA LOGO</div>`;
+  return `
+  <div class="section">
+    <h2>Perkongsian Data Merentasi Peranti</h2>
+    <div class="hint" style="margin:0 0 10px;">
+      Secara lalai, borang cuma tersimpan untuk akaun/sesi awak sendiri. Untuk guru lain nampak borang yang sama dari peranti masing-masing, sediakan "Google Apps Script Web App" (percuma) dan tampal pautannya di bawah. Minta pautan ini daripada admin/pencipta sistem sekali sahaja untuk seluruh sekolah.
+    </div>
+    <div class="field">
+      <label>Pautan API (Google Apps Script Web App)</label>
+      <input type="text" id="set-apiurl" value="${esc(s.apiUrl)}" placeholder="https://script.google.com/macros/s/xxxxx/exec">
+    </div>
+    <div class="hint" style="margin:0;">
+      Kosongkan medan ini untuk kembali guna storan tempatan (tidak dikongsi).
+    </div>
+  </div>
+  <div class="section">
+    <h2>Tetapan Sekolah (letterhead cetakan)</h2>
+    <div class="field">
+      <label>Nama Sekolah</label>
+      <input type="text" id="set-name" value="${esc(s.schoolName)}">
+    </div>
+    <div class="field">
+      <label>Sub-tajuk</label>
+      <input type="text" id="set-sub" value="${esc(s.schoolSub)}">
+    </div>
+    <div class="field">
+      <label>Alamat</label>
+      <textarea id="set-addr">${esc(s.address)}</textarea>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Tel</label><input type="text" id="set-tel" value="${esc(s.tel)}"></div>
+      <div class="field"><label>Fax</label><input type="text" id="set-fax" value="${esc(s.fax)}"></div>
+    </div>
+    <div class="field">
+      <label>Logo (untuk cetakan)</label>
+      <div class="logo-row">
+        ${logoPreview}
+        <div>
+          <input type="file" accept="image/*" onchange="app.onLogoFile(this)"><br>
+          ${s.logo ? `<button class="btn small ghost" style="margin-top:6px;" onclick="app.removeLogo()">Buang logo</button>` : ""}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footbar">
+    <button class="btn ghost" onclick="app.goList()">Batal</button>
+    <button class="btn gold" onclick="collectSettingsAndSave()">Simpan Tetapan</button>
+  </div>
+  `;
+}
+function collectSettingsAndSave(){
+  state.settings.schoolName = document.getElementById("set-name").value;
+  state.settings.schoolSub = document.getElementById("set-sub").value;
+  state.settings.address = document.getElementById("set-addr").value;
+  state.settings.tel = document.getElementById("set-tel").value;
+  state.settings.fax = document.getElementById("set-fax").value;
+  state.settings.apiUrl = document.getElementById("set-apiurl").value.trim();
+  app.saveSettingsForm();
+  refreshRecordsFromSource().then(render);
+}
+
+loadAll();
+</script>
+</body>
+</html>
